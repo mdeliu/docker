@@ -1,0 +1,19 @@
+version: "3"
+services:
+  bitwarden:
+    image: vaultwarden/server
+    container_name: vaultwarden
+    hostname: vaultwarden
+    environment:
+      - DOMAIN=https://subdomain3.domain.com
+      - ADMIN_TOKEN=PASSWORD123	# modify
+      - SIGNUPS_ALLOWED=true	# modify
+      - WEBSOCKET_ENABLED=true
+      - TZ=Europe/Berlin
+    restart: unless-stopped
+    volumes:
+      - ./vw-data/:/data/
+networks:
+  default:
+      name: caddy_net
+      external: true
