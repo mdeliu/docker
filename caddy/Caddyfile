@@ -5,21 +5,21 @@
 
 # --- Apache ---
 
-{$MY_DOMAIN}.com {
+{$MY_DOMAIN}{
     reverse_proxy apache-blog:80
 }
 
 
 # --- Redirect ---
 
-www.{$MY_DOMAIN}.com {
+www.{$MY_DOMAIN}{
     redir https://{$MY_DOMAIN}
 }
 
 
 # --- Nextcloud ---
 
-nc.{$MY_DOMAIN}.com {
+nc.{$MY_DOMAIN}{
     header Strict-Transport-Security max-age=31536000;
     redir /.well-known/carddav /remote.php/carddav 301
     redir /.well-known/caldav /remote.php/caldav 301
@@ -31,7 +31,7 @@ nc.{$MY_DOMAIN}.com {
 
 # --- Vaultwarden ---
 
-vw.{$MY_DOMAIN}.com {
+vw.{$MY_DOMAIN}{
   encode gzip
   # Uncomment to improve security (WARNING: only use if you understand the implications!)
   # If you want to use FIDO2 WebAuthn, set X-Frame-Options to "SAMEORIGIN" or the Browser will block those requests
