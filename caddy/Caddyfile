@@ -2,43 +2,59 @@
     # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 }
 
-www.domain.com {
-    redir https://subdomain1.domain.com
-}
 
-subdomain1.domain.com {
+# --- Apache ---
+
+{$MY_DOMAIN}.com {
     reverse_proxy apache-blog:80
 }
 
-subdomain2.domain.com {
-    reverse_proxy nextcloud:443 {
-        transport http {
-                tls_insecure_skip_verify
-        }
-    }
-    header {
-        Strict-Transport-Security max-age=31536000;
-    }
-    redir /.well-known/carddav /remote.php/carddav 301
-    redir /.well-known/caldav /remote.php/caldav 301
+
+# --- Redirect ---
+
+www.{$MY_DOMAIN}.com {
+    redir https://{$MY_DOMAIN}
 }
 
-subdomain3.domain.com {
-    encode gzip
-    header {
-        # Enable cross-site filter (XSS) and tell browser to block detected attacks
-        X-XSS-Protection "1; mode=block"
-        # Disallow the site to be rendered within a frame (clickjacking protection)
-        X-Frame-Options "DENY"
-        # Prevent search engines from indexing (optional)
-        X-Robots-Tag "none"
-        # Server name removing
-        -Server
-    }
 
-    # Notifications redirected to the websockets server
-    reverse_proxy /notifications/hub vaultwarden:3012
+# --- Nextcloud ---
 
-    # Proxy the Root directory to Rocket
-    reverse_proxy vaultwarden:80
+nc.{$MY_DOMAIN}.com {
+    header Strict-Transport-Security max-age=31536000;
+    redir /.well-known/carddav /remote.php/carddav 301
+    redir /.well-known/caldav /remote.php/caldav 301
+    redir /.well-known/webfinger /index.php/.well-known/webfinger 301
+    redir /.well-known/nodeinfo /index.php/.well-known/nodeinfo 301
+    reverse_proxy nextcloud-web:80
+}
+
+
+# --- Vaultwarden ---
+
+vw.{$MY_DOMAIN}.com {
+  encode gzip
+  # Uncomment to improve security (WARNING: only use if you understand the implications!)
+  # If you want to use FIDO2 WebAuthn, set X-Frame-Options to "SAMEORIGIN" or the Browser will block those requests
+  header {
+       # Enable HTTP Strict Transport Security (HSTS)
+       Strict-Transport-Security "max-age=31536000;"
+       # Enable cross-site filter (XSS) and tell browser to block detected attacks
+       X-XSS-Protection "1; mode=block"
+       # Disallow the site to be rendered within a frame (clickjacking protection)
+       X-Frame-Options "DENY"
+       # Prevent search engines from indexing (optional)
+       X-Robots-Tag "none"
+       # Server name removing
+       -Server
+  }
+
+  # Notifications redirected to the websockets server
+  reverse_proxy /notifications/hub vaultwarden:3012
+
+  # Proxy everything else to Rocket
+  reverse_proxy vaultwarden:80 {
+       # Send the true remote IP to Rocket, so that vaultwarden can put this in the
+       # log, so that fail2ban can ban the correct IP.
+       header_up X-Real-IP {remote_host}
+  }
 }

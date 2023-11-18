@@ -1,13 +1,16 @@
-version: "3.7"
+version: "3"
+
 services:
+
   apache:
     image: httpd:latest
-    container_name: apache-blog
-    hostname: apache-blog
+    container_name: apache
+    hostname: apache
     restart: unless-stopped
     volumes:
       - ./htdocs:/usr/local/apache2/htdocs/
+
 networks:
   default:
-      name: caddy_net
+      name: $DOCKER_MY_NETWORK
       external: true

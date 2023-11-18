@@ -1,18 +1,21 @@
-version: "3.7"
 services:
+
   caddy:
     image: caddy
     container_name: caddy
     hostname: caddy
     restart: unless-stopped
+    env_file: .env
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./data:/data
-      - ./config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_config:/config
+      - ./caddy_data:/data
+
 networks:
   default:
-      name: caddy_net
-      external: true
+    name: $DOCKER_MY_NETWORK
+    external: true

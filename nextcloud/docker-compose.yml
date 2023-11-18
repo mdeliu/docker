@@ -1,17 +1,59 @@
----
-version: "2.1"
+version: '3'
 services:
-  nextcloud:
-    image: lscr.io/linuxserver/nextcloud
-    container_name: nextcloud
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Berlin
+
+  nextcloud-db:
+    image: mariadb
+    container_name: nextcloud-db
+    hostname: nextcloud-db
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb_read_only_compressed=OFF
+    restart: unless-stopped
+    env_file: .env
     volumes:
-      - ./config:/config
-      - ./data:/data
+      - ./nextcloud_data_db:/var/lib/mysql
+
+  nextcloud-redis:
+    image: redis:alpine
+    container_name: nextcloud-redis
+    hostname: nextcloud-redis
+    restart: unless-stopped
+
+  nextcloud-app:
+    image: nextcloud:fpm-alpine
+    container_name: nextcloud-app
+    hostname: nextcloud-app
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - nextcloud-db
+      - nextcloud-redis
+    volumes:
+      - ./nextcloud_data/:/var/www/html
+
+  nextcloud-web:
+    image: nginx:alpine
+    container_name: nextcloud-web
+    hostname: nextcloud-web
+    restart: unless-stopped
+    volumes:
+      - ./nextcloud_data/:/var/www/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    expose:
+      - 80:80
+
+  nextcloud-cron:
+    image: nextcloud:fpm-alpine
+    container_name: nextcloud-cron
+    hostname: nextcloud-cron
+    restart: unless-stopped
+    volumes:
+      - ./nextcloud_data/:/var/www/html
+    entrypoint: /cron.sh
+    depends_on:
+      - nextcloud-db
+      - nextcloud-redis
+
 networks:
   default:
-      name: caddy_net
-      external: true
+    name: $DOCKER_MY_NETWORK
+    external: true
+
