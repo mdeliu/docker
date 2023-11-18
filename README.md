@@ -8,7 +8,7 @@ Docker and Docker-Compose files
 * Nextcloud for everything else
 
 
-### Setup on Debian 11, 12
+# Setup on Debian 11, 12
 ```
 sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
 ```
