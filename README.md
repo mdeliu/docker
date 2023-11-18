@@ -34,7 +34,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
 ```
-sudo docker network caddy_net
+sudo docker network create caddy_net
 ```
 
 # Resources and thanks to
