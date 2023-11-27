@@ -7,8 +7,7 @@ Docker and Docker-Compose files
 * Vaultwarden as password manager
 * Nextcloud for everything else
 
-
-# Setup on Debian 11, 12
+# Setup on Debian
 ```
 sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
 ```
